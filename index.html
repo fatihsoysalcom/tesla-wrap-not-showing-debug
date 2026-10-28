@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Wrap Debugger</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        #container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        #teslaModel {
+            width: 300px;
+            height: 150px;
+            border: 2px solid #333;
+            background-color: #ccc; /* Default base color */
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #555;
+            background-size: cover; /* Ensure wrap covers the model */
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.3s ease-in-out, background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        #message {
+            margin-top: 15px;
+            color: #d9534f;
+            font-weight: bold;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Tesla Wrap Debugger</h1>
+        <p>Simulates common issues preventing digital wraps from appearing.</p>
+
+        <div id="teslaModel">
+            Tesla Model (No Wrap)
+        </div>
+
+        <div class="controls">
+            <button onclick="applyWrap('https://picsum.photos/300/150?random=1')">Apply Valid Wrap</button>
+            <button onclick="applyWrap('https://invalid.url/nonexistent.png')">Simulate Broken Path</button>
+            <button onclick="toggleVisibility()">Toggle Wrap Visibility</button>
+            <button onclick="resetModel()">Reset Model</button>
+        </div>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        const teslaModel = document.getElementById('teslaModel');
+        const message = document.getElementById('message');
+        let currentWrapUrl = '';
+        let wrapVisible = true;
+
+        function clearMessage() {
+            message.textContent = '';
+            message.style.color = '#d9534f'; // Default error color
+        }
+
+        function applyWrap(url) {
+            clearMessage();
+            currentWrapUrl = url;
+
+            // Simulate checking if the image path is correct
+            const img = new Image();
+            img.onload = () => {
+                teslaModel.style.backgroundImage = `url('${url}')`;
+                teslaModel.textContent = ''; // Clear text when wrap is applied
+                message.textContent = 'Wrap applied successfully!';
+                message.style.color = '#28a745'; // Success color
+                // Ensure visibility if it was hidden
+                teslaModel.style.opacity = '1';
+                wrapVisible = true;
+            };
+            img.onerror = () => {
+                teslaModel.style.backgroundImage = 'none'; // Remove any previous wrap
+                teslaModel.style.backgroundColor = '#ffdddd'; // Indicate error visually
+                teslaModel.textContent = 'Wrap Failed to Load (Broken Path?)';
+                message.textContent = 'Error: Wrap image could not be loaded. Check path!';
+                // This directly addresses the article's point about checking *before* downloading new PNGs.
+                // A broken path is a common reason for a wrap not appearing.
+            };
+            img.src = url; // Attempt to load the image
+        }
+
+        function toggleVisibility() {
+            clearMessage();
+            wrapVisible = !wrapVisible;
+            if (wrapVisible) {
+                teslaModel.style.opacity = '1';
+                message.textContent = 'Wrap is now visible.';
+                message.style.color = '#28a745';
+            } else {
+                teslaModel.style.opacity = '0.1'; // Make it almost invisible
+                message.textContent = 'Wrap visibility reduced (e.g., covered by another layer).';
+                message.style.color = '#f0ad4e'; // Warning color
+                // This simulates a common issue where the wrap might be applied but not visible
+                // due to layering, opacity, or other rendering issues (like z-index in 3D).
+            }
+        }
+
+        function resetModel() {
+            clearMessage();
+            teslaModel.style.backgroundImage = 'none';
+            teslaModel.style.backgroundColor = '#ccc';
+            teslaModel.textContent = 'Tesla Model (No Wrap)';
+            teslaModel.style.opacity = '1';
+            wrapVisible = true;
+            message.textContent = 'Model reset to default state.';
+            message.style.color = '#007bff';
+        }
+
+        // Initial state
+        resetModel();
+    </script>
+</body>
+</html>
